@@ -21,11 +21,19 @@ class GenBot
       @model = Model.load("model/#{modelname}.model")
       @top100 = @model.keywords.top(100).map(&:to_s).map(&:downcase)
       @top50 = @model.keywords.top(20).map(&:to_s).map(&:downcase)
+      # bot.tweet @model.make_statement
     end
 
     bot.on_message do |dm|
-      bot.delay DELAY do
-        bot.reply dm, @model.make_response(dm[:text])
+      if dm[:sender][:screen_name] == "ivey"
+        case dm[:text]
+        when /tweet (.*)/
+          bot.tweet @model.make_response(dm[:text])
+        end
+      else
+        bot.delay DELAY do
+          bot.reply dm, @model.make_response(dm[:text])
+        end
       end
     end
 
@@ -83,6 +91,14 @@ class GenBot
       elsif interesting
         favorite(tweet) if rand < 0.1
         reply(tweet, meta) if rand < 0.05
+      end
+    end
+
+    bot.scheduler.every '55m' do
+      # random chance of standard tweet every 30 min
+      # TODO: adjust for hyperactivity levels
+      if rand > 0.5
+        bot.tweet @model.make_statement
       end
     end
 
