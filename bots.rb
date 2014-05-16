@@ -3,8 +3,6 @@
 require 'twitter_ebooks'
 include Ebooks
 
-CONSUMER_KEY = ""
-CONSUMER_SECRET = ""
 DELAY = 2..30 # Simulated human reply delay range in seconds
 BLACKLIST = ['insomnius', 'upulie'] # Grumpy users to avoid interaction with
 
@@ -16,8 +14,8 @@ class GenBot
     @bot = bot
     @model = nil
 
-    bot.consumer_key = CONSUMER_KEY
-    bot.consumer_secret = CONSUMER_SECRET
+    bot.consumer_key = ENV['CONSUMER_KEY']
+    bot.consumer_secret = ENV['CONSUMER_SECRET']
 
     bot.on_startup do
       @model = Model.load("model/#{modelname}.model")
@@ -63,7 +61,7 @@ class GenBot
       # tweet matches our keywords
       interesting = tokens.find { |t| @top100.include?(t.downcase) }
       very_interesting = tokens.find_all { |t| @top50.include?(t.downcase) }.length > 2
-      special = tokens.find { |t| ['ebooks', 'bot', 'bots', 'clone', 'singularity', 'world domination'].include?(t) }
+      special = tokens.find { |t| ['ebooks', 'bot', 'bots', 'golang', 'leagueoflegends', 'riot'].include?(t) }
 
       if special
         favorite(tweet)
@@ -121,9 +119,9 @@ def make_bot(bot, modelname)
   GenBot.new(bot, modelname)
 end
 
-Ebooks::Bot.new("username_ebooks") do |bot| # Ebooks account username
-  bot.oauth_token = "" # oauth token for ebooks account
-  bot.oauth_token_secret = "" # oauth secret for ebooks account
+Ebooks::Bot.new("iveybot") do |bot| # Ebooks account username
+  bot.oauth_token = ENV['OAUTH_TOKEN']
+  bot.oauth_token_secret = ENV['OAUTH_SECRET']
 
-  make_bot(bot, "username") # This should be the name of the text model
+  make_bot(bot, "ivey") # This should be the name of the text model
 end
